@@ -8,135 +8,290 @@
 const $ = (id) => document.querySelector(id);
 const $_ = (id) => document.querySelectorAll(id);
 
-// global data store for Alpine.js
-const staticData = {
-    /* ---------------------------- Blog List ---------------------------- */
+// global data store for Vue.js
+const mountpoint = "body";
+Vue.createApp({
+    data() {
+        return {
+            /* ---------------------------- Blog List ---------------------------- */
 
-    blogList: [
-        { name: "Blog 1", content: "This is blog post 1", published: false },
-        { name: "Blog 2", content: "This is blog post 2", published: false },
-        { name: "Blog 3", content: "This is blog post 3", published: false },
-    ],
+            blogList: [
+                {
+                    name: "Blog 1",
+                    content: "This is blog post 1",
+                    published: false,
+                },
+                {
+                    name: "Blog 2",
+                    content: "This is blog post 2",
+                    published: false,
+                },
+                {
+                    name: "Blog 3",
+                    content: "This is blog post 3",
+                    published: false,
+                },
+            ],
 
-    /* ---------------------------- Edit Group --------------------------- */
+            /* ---------------------------- Edit Group --------------------------- */
 
-    editOn: false, // whether a blog is being edited
-    currentlyEditing: -1, // index of the blog being edited
+            editOn: false, // whether a blog is being edited
+            currentlyEditing: -1, // index of the blog being edited
 
-    /**
-     * Gets the blog post content from the database
-     *
-     * @returns string to populate text area with
-     */
-    getEditText() {
-        return this.currentlyEditing < 0
-            ? ""
-            : this.blogList[this.currentlyEditing].content;
+            /* ----------------------------- Keyboard ---------------------------- */
+
+            kbdFocus: null, // text field to focus
+            shiftOn: false, // state of the shift key
+
+            // special keys
+            sp: {
+                shift: "shift",
+                delete: "delete",
+                return: "return",
+                space: "space",
+            },
+
+            // alphanumeric and punctuation keys
+            glyphs: [
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+                "0",
+                "q",
+                "w",
+                "e",
+                "r",
+                "t",
+                "y",
+                "u",
+                "i",
+                "o",
+                "p",
+                "a",
+                "s",
+                "d",
+                "f",
+                "g",
+                "h",
+                "j",
+                "k",
+                "l",
+                '"',
+                "z",
+                "x",
+                "c",
+                "v",
+                "b",
+                "n",
+                "m",
+                ".",
+                "?",
+                ",",
+            ],
+        };
     },
+    methods: {
+        /* ---------------------------- Edit Group --------------------------- */
 
-    /**
-     * Enable or disable the editing of a blog post
-     *
-     * @param {Object} elem DOM object of the switched edit toggle
-     * @param {Integer} index index of the toggle switch
-     */
-    editText(elem, index) {
-        $_(".bl-name-text")[index].disabled = this.editOn;
+        /**
+         * Gets the blog post content from the database
+         *
+         * @returns string to populate text area with
+         */
+        getEditText() {
+            return this.currentlyEditing < 0
+                ? ""
+                : this.blogList[this.currentlyEditing].content;
+        },
 
-        this.editOn = !this.editOn;
-        this.currentlyEditing = elem.checked ? index : -1;
+        /**
+         * Enable or disable the editing of a blog post
+         *
+         * @param {Object} elem DOM object of the switched edit toggle
+         * @param {Integer} index index of the toggle switch
+         */
+        editText(elem, index) {
+            $_(".bl-name-text")[index].disabled = this.editOn;
 
-        $_(".bl-edit-toggle").forEach((el) => {
-            if (!el.checked) {
-                el.style.visibility = elem.checked ? "hidden" : "visible";
+            this.editOn = !this.editOn;
+            this.currentlyEditing = elem.checked ? index : -1;
+
+            $_(".bl-edit-toggle").forEach((el) => {
+                if (!el.checked) {
+                    el.style.visibility = elem.checked ? "hidden" : "visible";
+                }
+            });
+
+            if (!this.editOn) {
+                this.kbdFocus = $("#editbox");
             }
-        });
+        },
 
-        if (!this.editOn) {
-            this.kbdFocus = $("#editbox");
-        }
-    },
+        /* ----------------------------- Keyboard ---------------------------- */
 
-    /* ----------------------------- Keyboard ---------------------------- */
+        /**
+         * Adds a character to the text area
+         *
+         * @param {String} selection character to add to text area
+         */
+        addChar(selection) {
+            // DOM object of the text area
+            let words = this.kbdFocus ? this.kbdFocus : $("#editbox");
 
-    kbdFocus: null, // text field to focus
-    shiftOn: false, // state of the shift key
+            // Get the value from the id'ed field
+            let currChars = words.value;
 
-    /**
-     * Adds a character to the text area
-     *
-     * @param {String} selection character to add to text area
-     */
-    addChar(selection) {
-        // DOM object of the text area
-        let words = this.kbdFocus ? this.kbdFocus : $("#editbox");
-
-        // Get the value from the id'ed field
-        let currChars = words.value;
-
-        if (selection === "del") {
-            // Set the id'ed field to a shortened string
-            words.value = currChars.substring(0, currChars.length - 1);
-        } else {
-            // handle shift toggle
-            if (this.shiftOn) {
-                selection = selection.toUpperCase();
-                this.shiftOn = !this.shiftOn;
+            if (selection === "del") {
+                // Set the id'ed field to a shortened string
+                words.value = currChars.substring(0, currChars.length - 1);
+            } else {
+                // handle shift toggle
+                if (this.shiftOn) {
+                    selection = selection.toUpperCase();
+                    this.shiftOn = !this.shiftOn;
+                }
+                // Set the id'ed field to the longer string
+                words.value = currChars.concat(selection);
             }
-            // Set the id'ed field to the longer string
-            words.value = currChars.concat(selection);
-        }
+        },
     },
+}).mount(mountpoint);
 
-    // special keys
-    sp: {
-        shift: "shift",
-        delete: "delete",
-        return: "return",
-        space: "space",
-    },
+// // global data store for Alpine.js
+// const staticData = {
+//     /* ---------------------------- Blog List ---------------------------- */
 
-    // alphanumeric and punctuation keys
-    glyphs: [
-        "1",
-        "2",
-        "3",
-        "4",
-        "5",
-        "6",
-        "7",
-        "8",
-        "9",
-        "0",
-        "q",
-        "w",
-        "e",
-        "r",
-        "t",
-        "y",
-        "u",
-        "i",
-        "o",
-        "p",
-        "a",
-        "s",
-        "d",
-        "f",
-        "g",
-        "h",
-        "j",
-        "k",
-        "l",
-        '"',
-        "z",
-        "x",
-        "c",
-        "v",
-        "b",
-        "n",
-        "m",
-        ".",
-        "?",
-        ",",
-    ],
-};
+//     blogList: [
+//         { name: "Blog 1", content: "This is blog post 1", published: false },
+//         { name: "Blog 2", content: "This is blog post 2", published: false },
+//         { name: "Blog 3", content: "This is blog post 3", published: false },
+//     ],
+
+//     /* ---------------------------- Edit Group --------------------------- */
+
+//     editOn: false, // whether a blog is being edited
+//     currentlyEditing: -1, // index of the blog being edited
+
+//     /**
+//      * Gets the blog post content from the database
+//      *
+//      * @returns string to populate text area with
+//      */
+//     getEditText() {
+//         return this.currentlyEditing < 0
+//             ? ""
+//             : this.blogList[this.currentlyEditing].content;
+//     },
+
+//     /**
+//      * Enable or disable the editing of a blog post
+//      *
+//      * @param {Object} elem DOM object of the switched edit toggle
+//      * @param {Integer} index index of the toggle switch
+//      */
+//     editText(elem, index) {
+//         $_(".bl-name-text")[index].disabled = this.editOn;
+
+//         this.editOn = !this.editOn;
+//         this.currentlyEditing = elem.checked ? index : -1;
+
+//         $_(".bl-edit-toggle").forEach((el) => {
+//             if (!el.checked) {
+//                 el.style.visibility = elem.checked ? "hidden" : "visible";
+//             }
+//         });
+
+//         if (!this.editOn) {
+//             this.kbdFocus = $("#editbox");
+//         }
+//     },
+
+//     /* ----------------------------- Keyboard ---------------------------- */
+
+//     kbdFocus: null, // text field to focus
+//     shiftOn: false, // state of the shift key
+
+//     /**
+//      * Adds a character to the text area
+//      *
+//      * @param {String} selection character to add to text area
+//      */
+//     addChar(selection) {
+//         // DOM object of the text area
+//         let words = this.kbdFocus ? this.kbdFocus : $("#editbox");
+
+//         // Get the value from the id'ed field
+//         let currChars = words.value;
+
+//         if (selection === "del") {
+//             // Set the id'ed field to a shortened string
+//             words.value = currChars.substring(0, currChars.length - 1);
+//         } else {
+//             // handle shift toggle
+//             if (this.shiftOn) {
+//                 selection = selection.toUpperCase();
+//                 this.shiftOn = !this.shiftOn;
+//             }
+//             // Set the id'ed field to the longer string
+//             words.value = currChars.concat(selection);
+//         }
+//     },
+
+//     // special keys
+//     sp: {
+//         shift: "shift",
+//         delete: "delete",
+//         return: "return",
+//         space: "space",
+//     },
+
+//     // alphanumeric and punctuation keys
+//     glyphs: [
+//         "1",
+//         "2",
+//         "3",
+//         "4",
+//         "5",
+//         "6",
+//         "7",
+//         "8",
+//         "9",
+//         "0",
+//         "q",
+//         "w",
+//         "e",
+//         "r",
+//         "t",
+//         "y",
+//         "u",
+//         "i",
+//         "o",
+//         "p",
+//         "a",
+//         "s",
+//         "d",
+//         "f",
+//         "g",
+//         "h",
+//         "j",
+//         "k",
+//         "l",
+//         '"',
+//         "z",
+//         "x",
+//         "c",
+//         "v",
+//         "b",
+//         "n",
+//         "m",
+//         ".",
+//         "?",
+//         ",",
+//     ],
+// };
