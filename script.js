@@ -27,6 +27,9 @@ const $ = (selector) => document.querySelector(selector);
  */
 const $_ = (selector) => document.querySelectorAll(selector);
 
+const NUM_POSTS = 3; // number of blog posts
+const ERR_INDEX = -1; // placeholder index value
+
 // global data store for Alpine.js
 const staticData = {
     /** ---------------------------- Blog List ----------------------------
@@ -35,11 +38,23 @@ const staticData = {
      * @author Sheikh Saad Abdullah (A00447871)
      * -------------------------------------------------------------------- */
 
-    blogList: [
-        { name: "Blog 1", content: "", published: false },
-        { name: "Blog 2", content: "", published: false },
-        { name: "Blog 3", content: "", published: false },
-    ],
+    /**
+     * Generate an array of blog entries
+     *
+     * @author Sheikh Saad Abdullah (A00447871)
+     * @returns Array of blog entries
+     */
+    blogList() {
+        let arr = [];
+        for (let i = 0; i < NUM_POSTS; i++) {
+            arr.push({
+                name: `Blog ${i + 1}`,
+                content: "",
+                published: false,
+            });
+        }
+        return arr;
+    },
 
     /** ---------------------------- Edit Group ---------------------------
      * Variables and functions to control the behaviour
@@ -51,7 +66,7 @@ const staticData = {
      * -------------------------------------------------------------------- */
 
     editOn: false, // whether a blog is being edited
-    currentlyEditing: -1, // index of the blog being edited
+    currentlyEditing: ERR_INDEX, // index of the blog being edited
 
     /**
      * Saves the blog post content to the database
@@ -85,25 +100,13 @@ const staticData = {
     },
 
     /**
-     * Gets all blogs from the database and populates a local list
-     *
-     * @author Sheikh Saad Abdullah (A00447871)
-     * @returns string to populate text area with
-     */
-    load() {
-        for (let i = 0; i < 3; i++) {
-            this.blogList[i] = localStorage.getItem(`blog${i}`);
-        }
-    },
-
-    /**
      * Populate the text area with the currently editing blog content
      *
      * @author Nayem Imtiaz (A00448982)
      * @returns string to populate text area with
      */
     getEditText() {
-        return localStorage.getItem(`blog${this.currentlyEditing}`) || "";
+        return localStorage.getItem(`blog${this.currentlyEditing}`);
     },
 
     /**
@@ -117,7 +120,7 @@ const staticData = {
         $_(".bl-name-text")[index].disabled = this.editOn;
 
         this.editOn = !this.editOn;
-        this.currentlyEditing = elem.checked ? index : -1;
+        this.currentlyEditing = elem.checked ? index : ERR_INDEX;
 
         $_(".bl-edit-toggle").forEach((el) => {
             if (!el.checked) {
@@ -128,8 +131,6 @@ const staticData = {
         if (!this.editOn) {
             this.kbdFocus = $("#editbox");
         }
-
-        this.cancel();
     },
 
     /** ----------------------------- Keyboard ----------------------------
