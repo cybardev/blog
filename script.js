@@ -106,7 +106,7 @@ const staticData = {
      * @returns string to populate text area with
      */
     getEditText() {
-        return localStorage.getItem(`blog${this.currentlyEditing}`);
+        return localStorage.getItem(`blog${this.currentlyEditing}`) || "";
     },
 
     /**
