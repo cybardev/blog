@@ -10,13 +10,21 @@
  */
 
 /**
- * Aliases to create DOM objects using $() like in JQuery
+ * Alias to create DOM object with specified selector
  *
  * @author Sheikh Saad Abdullah (A00447871)
- * @param {String} selector selector for the element
- * @returns DOM Object for specified element
+ * @param {String} selector selector of the element
+ * @returns DOM Object of first element with specified selector
  */
 const $ = (selector) => document.querySelector(selector);
+
+/**
+ * Alias to create Array of DOM objects with specified selector
+ *
+ * @author Sheikh Saad Abdullah (A00447871)
+ * @param {String} selector selector of the elements
+ * @returns Array of DOM Objects of elements with specified selector
+ */
 const $_ = (selector) => document.querySelectorAll(selector);
 
 // global data store for Alpine.js
