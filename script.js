@@ -92,9 +92,7 @@ const staticData = {
      */
     load() {
         for (let i = 0; i < 3; i++) {
-            this.blogList[i] = localStorage.getItem(
-                `blog${this.currentlyEditing}`
-            );
+            this.blogList[i] = localStorage.getItem(`blog${i + 1}`);
         }
     },
 
