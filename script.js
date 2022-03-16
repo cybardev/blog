@@ -29,6 +29,31 @@ const $_ = (selector) => document.querySelectorAll(selector);
 
 const NUM_POSTS = 3; // number of blog posts
 const ERR_INDEX = -1; // placeholder index value
+const storageAvailable = typeof Storage !== "undefined"; // check for browser support of storage
+
+// log error if storage is unavailable
+if (!storageAvailable) {
+    console.error("Local storage unavailable.");
+}
+
+// load blog list into local storage
+window.onload = () => {
+    if (storageAvailable) {
+        let arr = [];
+        let data = JSON.parse(localStorage.getItem("blogs")) || [];
+        for (let i = 0; i < NUM_POSTS; i++) {
+            if (typeof data[i] === "undefined") {
+                arr[i] = {
+                    name: `Blog ${i + 1}`,
+                    content: "",
+                    published: false,
+                };
+            }
+        }
+        localStorage.setItem("blogs", JSON.stringify(arr));
+        console.log(JSON.parse(localStorage.getItem("blogs")));
+    }
+};
 
 // global data store for Alpine.js
 const staticData = {
@@ -37,24 +62,6 @@ const staticData = {
      *
      * @author Sheikh Saad Abdullah (A00447871)
      * -------------------------------------------------------------------- */
-
-    /**
-     * Generate an array of blog entries
-     *
-     * @author Sheikh Saad Abdullah (A00447871)
-     * @returns Array of blog entries
-     */
-    blogList() {
-        let arr = [];
-        for (let i = 0; i < NUM_POSTS; i++) {
-            arr.push({
-                name: `Blog ${i + 1}`,
-                content: "",
-                published: false,
-            });
-        }
-        return arr;
-    },
 
     /** ---------------------------- Edit Group ---------------------------
      * Variables and functions to control the behaviour
@@ -76,27 +83,15 @@ const staticData = {
      * @returns string to populate text area with
      */
     save() {
-        if (typeof Storage !== "undefined") {
-            localStorage.setItem(
-                `blog${this.currentlyEditing}`,
-                $("#editbox").value
-            );
-        } else {
-            console.error("Local storage unavailable.");
+        if (storageAvailable) {
+            const index = this.currentlyEditing;
+            const data = {
+                name: $(`#bl-name-${index + 1}`).value,
+                content: $("#editbox").value,
+                published: $(`#bl-publish-${index + 1}`).checked,
+            };
+            localStorage.setItem(`blog${index}`, JSON.stringify(data));
         }
-    },
-
-    /**
-     * Gets the blog post content from the database
-     *
-     * @author Nayem Imtiaz (A00448982)
-     * @author Sheikh Saad Abdullah (A00447871)
-     * @returns string to populate text area with
-     */
-    cancel() {
-        $("#editbox").value = localStorage.getItem(
-            `blog${this.currentlyEditing}`
-        );
     },
 
     /**
@@ -106,7 +101,10 @@ const staticData = {
      * @returns string to populate text area with
      */
     getEditText() {
-        return localStorage.getItem(`blog${this.currentlyEditing}`);
+        return this.currentlyEditing < 0
+            ? ""
+            : JSON.parse(localStorage.getItem(`blog${this.currentlyEditing}`))
+                  .content;
     },
 
     /**
@@ -120,7 +118,7 @@ const staticData = {
         $_(".bl-name-text")[index].disabled = this.editOn;
 
         this.editOn = !this.editOn;
-        this.currentlyEditing = elem.checked ? index : ERR_INDEX;
+        this.currentlyEditing = index;
 
         $_(".bl-edit-toggle").forEach((el) => {
             if (!el.checked) {

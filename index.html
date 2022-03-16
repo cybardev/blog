@@ -46,34 +46,30 @@
         ></script>
         <!-- HEAD: { END } -->
     </head>
-    <body x-data="staticData" class="m-5">
+    <body x-data="staticData" class="m-5" x-cloak>
         <!-- { START }
             Blog List:
                 Display list of blogs with options
                 to edit and publish via toggle switches
 
             author: Mohak Shrivastava (A00445470)
+            author: Sheikh Saad Abdullah (A00447871)
          -->
         <div
             class="d-grid gap-3 my-2 blog-list"
-            x-id="[
-                'bl-name',
-                'bl-edit',
-                'bl-publish',
-                'bl-edit-toggle',
-                'bl-publish-toggle'
-            ]"
+            x-data="{ blogs : JSON.parse(localStorage.getItem('blogs')) }"
         >
             <h2 class="bl-header text-primary">Blog Name</h2>
             <h2 class="bl-header text-primary">Edit</h2>
             <h2 class="bl-header text-primary">Publish</h2>
             <div class="bl-name">
-                <template x-for="blog in blogList">
+                <template x-for="blog in blogs">
                     <input
+                        x-id="['bl-name']"
                         class="bl-name-text my-1"
                         type="text"
-                        :name="$id('bl-edit')"
-                        :id="$id('bl-edit')"
+                        :name="$id('bl-name')"
+                        :id="$id('bl-name')"
                         placeholder="&lt;type name&gt;"
                         :value="blog.name"
                         x-model="blog.name"
@@ -83,26 +79,26 @@
                 </template>
             </div>
             <div class="bl-edit">
-                <template x-for="(blog, index) in blogList">
+                <template x-for="(blog, index) in blogs">
                     <div class="bl-edit form-check form-switch">
                         <input
                             class="bl-edit-toggle form-check-input my-1"
                             type="checkbox"
                             role="switch"
-                            :id="$id('bl-edit-toggle')"
+                            :id="$id('bl-edit')"
                             @change="editText($el, index)"
                         />
                     </div>
                 </template>
             </div>
             <div class="bl-publish">
-                <template x-for="(blog, index) in blogList">
+                <template x-for="(blog, index) in blogs">
                     <div class="bl-publish form-check form-switch">
                         <input
                             class="bl-publish-toggle form-check-input my-1"
                             type="checkbox"
                             role="switch"
-                            :id="$id('bl-publish-toggle')"
+                            :id="$id('bl-publish')"
                             :checked="blog.published"
                             @change="blogList[index].published
                             = !blogList[index].published"
@@ -138,7 +134,7 @@
                     <button
                         type="button"
                         class="btn btn-warning cancel-btn"
-                        @mousedown="cancel"
+                        @mousedown="$refs.editbox.value = getEditText()"
                     >
                         Cancel
                     </button>
@@ -146,7 +142,7 @@
                 <textarea
                     id="editbox"
                     x-ref="editbox"
-                    name="textbox"
+                    name="editbox"
                     rows="9"
                     cols="56"
                     class="d-block my-2 px-2"
@@ -168,7 +164,7 @@
                     <button
                         type="button"
                         class="btn btn-warning cancel-btn"
-                        @mousedown="cancel"
+                        @mousedown="$refs.editbox.value = getEditText()"
                     >
                         Cancel
                     </button>
